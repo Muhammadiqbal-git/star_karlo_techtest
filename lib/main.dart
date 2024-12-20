@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import 'package:test_starkarlo/utils/helper.dart';
-import 'package:test_starkarlo/utils/map_utils.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:test_starkarlo/blocs/map/map_cubit.dart';
+import 'package:test_starkarlo/navigation/route_names.dart';
+import 'package:test_starkarlo/navigation/custom_router.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  MapUtils().initMap();
   runApp(const MainApp());
 }
 
@@ -16,16 +14,15 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Container(
-              height: getHeight(context, 50),
-              width: getWidth(context, 70),
-              child: MapWidget(
-                cameraOptions: MapUtils().defaultCameraOptions(),
-              )),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => MapCubit()..initMap(),
         ),
+      ],
+      child: const MaterialApp(
+        onGenerateRoute: CustomRouter.generateRoute,
+        initialRoute: RouteNames.homePage,
       ),
     );
   }
