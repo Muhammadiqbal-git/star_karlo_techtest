@@ -103,7 +103,8 @@ class MapCubit extends Cubit<MapState> {
   void onMapCreated(MapboxMap mapboxMap) async {
     final currState = state;
     if (currState is MapReadyState) {
-      await _map.initializeMap(mapboxMap, currState.geometry, _listAnnotate);
+      await currState.mapUtils
+          .initializeMap(mapboxMap, currState.geometry, _listAnnotate);
     } else {
       await _map.initializeMap(mapboxMap, null, _listAnnotate);
     }

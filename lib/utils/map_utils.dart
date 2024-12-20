@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -34,7 +35,11 @@ class MapUtils {
     pManager = await mapboxMap.annotations.createPointAnnotationManager();
     // pLineManager =
     //     await mapboxMap.annotations.createPolylineAnnotationManager();
-    if (routeData != null) {
+    for (var element in listPoint) {
+      await _addAnnotationPoint(element);
+    }
+    await Future.delayed(Duration(milliseconds: 500));
+    if (routeData != null || routeData == []) {
       await mapboxMap.style.addSource(GeoJsonSource(
           id: "line",
           data: jsonEncode({
@@ -49,9 +54,6 @@ class MapUtils {
           lineCap: LineCap.ROUND,
           lineColor: AppColor.primaryOrange.value,
           lineWidth: 6.0));
-    }
-    for (var element in listPoint) {
-      await _addAnnotationPoint(element);
     }
   }
 
