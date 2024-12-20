@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6
+  mapbox_maps_flutter: ^2.0.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:

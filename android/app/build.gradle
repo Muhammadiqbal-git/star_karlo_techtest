@@ -45,8 +45,8 @@ android {
         applicationId "com.example.test_starkarlo"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion localProperties.getProperty('flutter.minSdkVersion').toInteger()
+        targetSdkVersion localProperties.getProperty('flutter.targetSdkVersion').toInteger()
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -64,4 +64,9 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation "com.mapbox.maps:android:11.8.1"
+    implementation "com.mapbox.extension:maps-compose:11.8.1"
+    implementation "com.mapbox.navigationcore:navigation:3.5.7"
+    implementation "com.mapbox.navigationcore:ui-maps:3.5.7"
+}
