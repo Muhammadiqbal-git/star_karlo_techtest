@@ -122,19 +122,22 @@ class MapPage extends StatelessWidget {
                                                 0,
                                             itemBuilder: (context, index) {
                                               final data = searchState
-                                                  .searchSuggestion![index];
+                                                  .searchSuggestion[index];
                                               return SuggestionWidget(
-                                                title: data.name,
-                                                address: data.fullAddress ??
-                                                    data.address ??
+                                                title: data.properties.name,
+                                                address: data.properties
+                                                        .fullAddress ??
+                                                    data.properties
+                                                        .placeFormatted ??
                                                     "",
                                                 index: index,
                                                 ontap: () {
-                                                  print(data.mapboxId);
+                                                  print(
+                                                      data.properties.mapboxId);
                                                   FocusScope.of(context)
                                                       .unfocus();
                                                   searchCubit.suggestionTapped(
-                                                      data.mapboxId);
+                                                      data.properties.mapboxId);
                                                 },
                                               );
                                             },

@@ -1,5 +1,5 @@
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import 'package:test_starkarlo/models/search_suggestion_model.dart';
+import 'package:test_starkarlo/models/geo_search_model.dart';
 
 abstract class SearchMapState {}
 
@@ -8,8 +8,8 @@ class SearchMapLoadingState extends SearchMapState {
 }
 
 class SearchMapSuggestionState extends SearchMapState {
-  final List<Suggestion>? searchSuggestion;
-  SearchMapSuggestionState({this.searchSuggestion});
+  final List<Features> searchSuggestion;
+  SearchMapSuggestionState({required this.searchSuggestion});
 }
 
 class SearchMapResultState extends SearchMapState {

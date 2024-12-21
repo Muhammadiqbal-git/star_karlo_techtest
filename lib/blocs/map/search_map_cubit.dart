@@ -4,8 +4,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:test_starkarlo/blocs/map/search_map_state.dart';
-import 'package:test_starkarlo/models/search_model.dart';
-import 'package:test_starkarlo/models/search_suggestion_model.dart';
+import 'package:test_starkarlo/models/geo_search_model.dart';
 import 'package:test_starkarlo/utils/map_api.dart';
 
 class SearchMapCubit extends Cubit<SearchMapState> {
@@ -69,36 +68,34 @@ class SearchMapCubit extends Cubit<SearchMapState> {
       _delayTimer!.cancel();
       print("canceling");
     }
-    SearchSuggestionModel? listSuggestion =
-        await _mapApi.searchLocation(searchVal, proximity);
-    if (listSuggestion != null && listSuggestion.suggestions.isNotEmpty) {
-      inspect(listSuggestion.suggestions.first);
-      emit(SearchMapSuggestionState(
-          searchSuggestion: listSuggestion.suggestions));
+    GeoSearchModel? listSuggestion =
+        await _mapApi.geoLocation(searchVal, proximity);
+    if (listSuggestion != null && listSuggestion.features.isNotEmpty) {
+      inspect(listSuggestion.features.first);
+      emit(SearchMapSuggestionState(searchSuggestion: listSuggestion.features));
     } else {
       emit(SearchMapEmptyState());
     }
   }
 
   void suggestionTapped(String id) async {
+    final currState = state;
     if (id == "") {
-      print("empty");
       emit(SearchMapEmptyState());
       return;
     }
     if (_delayTimer?.isActive ?? false) {
       _delayTimer!.cancel();
     }
-    SearchModel? searchResult = await _mapApi.fetchLocation(id);
-    if (searchResult != null) {
-      inspect(searchResult);
+    if (currState is SearchMapSuggestionState) {
+      Features feature =
+          currState.searchSuggestion.where((element) => element.id == id).first;
       emit(SearchMapResultState(
-          name: searchResult.features.first.properties.name,
-          placeFormatted: searchResult.features.first.properties.placeFormatted,
+          name: feature.properties.name,
+          placeFormatted: feature.properties.placeFormatted,
           coords: Point(
-              coordinates: Position(
-                  searchResult.features.first.geometry.coordinates[0],
-                  searchResult.features.first.geometry.coordinates[1]))));
+              coordinates: Position(feature.geometry.coordinates[0],
+                  feature.geometry.coordinates[1]))));
     }
   }
 }

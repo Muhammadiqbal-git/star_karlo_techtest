@@ -1,5 +1,5 @@
 name: test_starkarlo
-description: "A new Flutter project."
+description: "TechTest PT Star karlo"
 publish_to: 'none'
 version: 0.1.0
 
@@ -24,3 +24,4 @@ flutter:
   assets:
     - .env
     - assets/icons/
+    - assets/imgs/

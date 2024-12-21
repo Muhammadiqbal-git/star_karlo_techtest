@@ -8,6 +8,7 @@ import 'package:test_starkarlo/presentation/screens/map_page.dart';
 import 'package:test_starkarlo/presentation/widgets/custom_button.dart';
 import 'package:test_starkarlo/presentation/widgets/custom_text_field.dart';
 import 'package:test_starkarlo/utils/app_color.dart';
+import 'package:test_starkarlo/utils/helper.dart';
 import 'package:test_starkarlo/utils/text_style.dart';
 
 class HomePage extends StatelessWidget {
@@ -59,7 +60,13 @@ class HomePage extends StatelessWidget {
                 text: "Open Map",
                 textStyle: appTextStyle.t14.copyWith(color: AppColor.white),
                 onTap: () => Navigator.pushNamed(context, RouteNames.mapPage),
-              )
+              ),
+              SizedBox(
+                height: getHeight(context, 10),
+              ),
+              Image.asset("assets/imgs/home_img.png",
+                  height: getHeight(context, 25),
+                  cacheHeight: getHeight(context, 35).toInt())
             ],
           ),
         ));
