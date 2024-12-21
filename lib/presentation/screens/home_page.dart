@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_starkarlo/blocs/map/map_cubit.dart';
+import 'package:test_starkarlo/blocs/map/search_map_cubit.dart';
+import 'package:test_starkarlo/blocs/map/search_map_state.dart';
 import 'package:test_starkarlo/navigation/route_names.dart';
 import 'package:test_starkarlo/presentation/screens/map_page.dart';
 import 'package:test_starkarlo/presentation/widgets/custom_button.dart';
+import 'package:test_starkarlo/presentation/widgets/custom_text_field.dart';
 import 'package:test_starkarlo/utils/app_color.dart';
 import 'package:test_starkarlo/utils/text_style.dart';
 
@@ -34,9 +37,23 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsets.all(22.0),
           child: Column(
             children: [
-              CustomButton(
-                text: "Search",
-                textStyle: appTextStyle.t14.copyWith(color: AppColor.white),
+              BlocBuilder<SearchMapCubit, SearchMapState>(
+                builder: (context, state) {
+                  return CustomTextField(
+                    text: "Search",
+                    textStyle: appTextStyle.t14.copyWith(color: AppColor.white),
+                    hint: "Where do you looking for?",
+                    hintStyle: appTextStyle.t16
+                        .copyWith(color: AppColor.black.withOpacity(0.4)),
+                    onTap: (value) {
+                      context.read<SearchMapCubit>().setSearch(value);
+                      Navigator.pushNamed(context, RouteNames.mapPage);
+                    },
+                  );
+                },
+              ),
+              SizedBox(
+                height: 10,
               ),
               CustomButton(
                 text: "Open Map",

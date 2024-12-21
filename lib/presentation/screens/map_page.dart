@@ -5,15 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:test_starkarlo/blocs/map/map_cubit.dart';
 import 'package:test_starkarlo/blocs/map/map_state.dart';
+import 'package:test_starkarlo/blocs/map/search_map_cubit.dart';
+import 'package:test_starkarlo/blocs/map/search_map_state.dart';
 import 'package:test_starkarlo/presentation/widgets/custom_button.dart';
+import 'package:test_starkarlo/presentation/widgets/custom_text_field.dart';
 import 'package:test_starkarlo/utils/app_color.dart';
 import 'package:test_starkarlo/utils/helper.dart';
 import 'package:test_starkarlo/utils/text_style.dart';
 
 class MapPage extends StatelessWidget {
-  const MapPage({
-    super.key,
-  });
+  const MapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +30,8 @@ class MapPage extends StatelessWidget {
               );
             } else if (state is MapReadyState) {
               return SizedBox(
-                height: getHeight(context, 95),
-                width: getWidth(context, 90),
+                height: getHeight(context, 100),
+                width: getWidth(context, 100),
                 child: Stack(
                   children: [
                     MapWidget(
@@ -45,7 +46,10 @@ class MapPage extends StatelessWidget {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => Navigator.pop(context),
+                            onTap: () {
+                              context.read<SearchMapCubit>().setSearch("");
+                              Navigator.pop(context);
+                            },
                             borderRadius: BorderRadius.circular(50),
                             child: Ink(
                                 padding: const EdgeInsets.all(5),
@@ -59,8 +63,96 @@ class MapPage extends StatelessWidget {
                           ),
                         )),
                     Positioned(
-                        top: 20,
-                        right: 5,
+                      top: 45,
+                      left: 65,
+                      right: 14,
+                      child: BlocBuilder<SearchMapCubit, SearchMapState>(
+                        builder: (context, searchState) {
+                          SearchMapCubit searchCubit =
+                              context.read<SearchMapCubit>();
+                          return Column(
+                            children: [
+                              CustomTextField(
+                                text: "Search",
+                                textStyle: appTextStyle.t14
+                                    .copyWith(color: AppColor.white),
+                                onTap: (value) {
+                                  searchCubit.searchTapped(value,
+                                      "106.85194126513117,-6.157823021338689");
+                                },
+                                onChange: (value) {
+                                  searchCubit.setSearch(value);
+                                },
+                                focus: searchCubit.isFocus(),
+                                initText: searchCubit.initSearchText(),
+                              ),
+                              BlocConsumer<SearchMapCubit, SearchMapState>(
+                                listenWhen: (previous, current) {
+                                  if ((previous is SearchMapEmptyState ||
+                                          previous
+                                              is SearchMapSuggestionState) &&
+                                      current is SearchMapResultState) {
+                                    return true;
+                                  } else {
+                                    return false;
+                                  }
+                                },
+                                listener: (context, searchState) {
+                                  if (searchState is SearchMapResultState) {
+                                    mapCubit.onTapSuggestion(
+                                        "${searchState.name} \n${searchState.placeFormatted}",
+                                        searchState.coords);
+                                  }
+                                },
+                                builder: (context, searchState) {
+                                  if (searchState is SearchMapSuggestionState) {
+                                    return ConstrainedBox(
+                                      constraints:
+                                          BoxConstraints(maxHeight: 300),
+                                      child: Container(
+                                          color: AppColor.white,
+                                          margin: const EdgeInsets.only(
+                                              left: 5, top: 5, right: 65),
+                                          width: getWidth(context, 100),
+                                          child: ListView.builder(
+                                            padding: EdgeInsets.zero,
+                                            shrinkWrap: true,
+                                            itemCount: searchState
+                                                    .searchSuggestion?.length ??
+                                                0,
+                                            itemBuilder: (context, index) {
+                                              final data = searchState
+                                                  .searchSuggestion![index];
+                                              return SuggestionWidget(
+                                                title: data.name,
+                                                address: data.fullAddress ??
+                                                    data.address ??
+                                                    "",
+                                                index: index,
+                                                ontap: () {
+                                                  print(data.mapboxId);
+                                                  FocusScope.of(context)
+                                                      .unfocus();
+                                                  searchCubit.suggestionTapped(
+                                                      data.mapboxId);
+                                                },
+                                              );
+                                            },
+                                          )),
+                                    );
+                                  } else {
+                                    return SizedBox.shrink();
+                                  }
+                                },
+                              )
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                        top: 100,
+                        right: 14,
                         child: Container(
                           height: 100,
                           width: 40,
@@ -93,7 +185,7 @@ class MapPage extends StatelessWidget {
                         )),
                     Positioned(
                         bottom: 30,
-                        right: 20,
+                        right: 14,
                         child: Container(
                           height: 60,
                           padding: const EdgeInsetsDirectional.symmetric(
@@ -111,7 +203,7 @@ class MapPage extends StatelessWidget {
                                     .copyWith(color: AppColor.white),
                                 onTap: () => mapCubit.generateRoute(context),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 20,
                               ),
                               CustomButton(
@@ -131,6 +223,54 @@ class MapPage extends StatelessWidget {
               return const Text("error occured");
             }
           },
+        ),
+      ),
+    );
+  }
+}
+
+class SuggestionWidget extends StatelessWidget {
+  const SuggestionWidget({
+    super.key,
+    required this.title,
+    required this.address,
+    required this.index,
+    required this.ontap,
+  });
+
+  final String title;
+  final String address;
+  final int index;
+  final Function() ontap;
+
+  @override
+  Widget build(BuildContext context) {
+    double opacity = 0.10;
+    if (index % 2 == 0) {
+      opacity = 0.25;
+    }
+    return Material(
+      child: InkWell(
+        onTap: ontap,
+        child: Container(
+          color: AppColor.primaryGreen.withOpacity(opacity),
+          width: double.maxFinite,
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: appTextStyle.t14b,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                address,
+                style: appTextStyle.t14,
+                overflow: TextOverflow.ellipsis,
+              )
+            ],
+          ),
         ),
       ),
     );

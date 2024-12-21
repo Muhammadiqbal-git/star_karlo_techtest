@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_starkarlo/blocs/map/map_cubit.dart';
+import 'package:test_starkarlo/blocs/map/search_map_cubit.dart';
 import 'package:test_starkarlo/navigation/route_names.dart';
 import 'package:test_starkarlo/navigation/custom_router.dart';
 
@@ -18,6 +19,9 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => MapCubit()..initMap(),
+        ),
+        BlocProvider(
+          create: (context) => SearchMapCubit(),
         ),
       ],
       child: const MaterialApp(

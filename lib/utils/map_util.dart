@@ -7,7 +7,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:test_starkarlo/models/annotate_model.dart';
 import 'package:test_starkarlo/utils/app_color.dart';
 
-class MapUtils {
+class MapUtil {
   static String accessToken = "";
   late PointAnnotationManager pManager;
   late CameraOptions _camera;
@@ -59,6 +59,11 @@ class MapUtils {
 
   Future<void> _addAnnotationPoint(AnnotateModel aModel) async {
     try {
+      if (aModel.isLegend) {
+        pManager.create(await _createPointLegendsOptions(
+            aModel.text, aModel.lng, aModel.lat));
+        return;
+      }
       final options =
           await _createPointOptions(aModel.text, aModel.lng, aModel.lat);
       await pManager.create(options);
@@ -120,9 +125,39 @@ class MapUtils {
           coordinates: Position(lng, lat),
         ),
         textField: title,
+        textSize: 14,
+        textHaloColor: AppColor.white.value,
+        textHaloWidth: 5,
+        textHaloBlur: 8.0,
+        textOffset: [0, 1.5],
         image: imageData,
         iconColor: AppColor.primaryGreen.value,
-        iconOffset: [0, -100],
+        iconOffset: [0, 0],
+        iconSize: 0.2);
+  }
+
+  Future<PointAnnotationOptions> _createPointLegendsOptions(
+      String title, num lng, num lat) async {
+    final ByteData bytes =
+        await rootBundle.load('assets/icons/legend_marker.png');
+    final Uint8List imageData = bytes.buffer.asUint8List();
+    return PointAnnotationOptions(
+        geometry: Point(
+          coordinates: Position(lng, lat),
+        ),
+        textField: title,
+        textColor: AppColor.primaryOrange.value,
+        textSize: 14,
+        textHaloColor: AppColor.white.value,
+        textHaloWidth: 5,
+        textHaloBlur: 8.0,
+        textJustify: TextJustify.LEFT,
+        textAnchor: TextAnchor.LEFT,
+        textRadialOffset: 1.3,
+        textMaxWidth: 15,
+        image: imageData,
+        iconColor: AppColor.primaryGreen.value,
+        iconOffset: [0, 0],
         iconSize: 0.2);
   }
 
@@ -134,6 +169,11 @@ class MapUtils {
     await pManager.create(await _createPointOptions(text, lng, lat));
   }
 
+  Future<void> addLegends(String text, Point point) async {
+    customCameraZoom(customZoom: 16, center: point);
+    await pManager.create(await _createPointLegendsOptions(
+        text, point.coordinates.lng, point.coordinates.lat));
+  }
   // void dispose(){
   //   pManager.
   // }

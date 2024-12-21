@@ -6,15 +6,15 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:test_starkarlo/blocs/map/map_state.dart';
 import 'package:test_starkarlo/models/annotate_model.dart';
 import 'package:test_starkarlo/models/route_model.dart';
-import 'package:test_starkarlo/presentation/widgets/custom__text_field_dialog.dart';
+import 'package:test_starkarlo/presentation/widgets/custom_text_field_dialog.dart';
 import 'package:test_starkarlo/presentation/widgets/custom_alert_dialog.dart';
 import 'package:test_starkarlo/utils/map_api.dart';
-import 'package:test_starkarlo/utils/map_utils.dart';
+import 'package:test_starkarlo/utils/map_util.dart';
 import 'package:test_starkarlo/utils/text_style.dart';
 
 class MapCubit extends Cubit<MapState> {
   MapCubit() : super(MapInitState());
-  final MapUtils _map = MapUtils();
+  final MapUtil _map = MapUtil();
   final MapApi _mapApi = MapApi();
   List<AnnotateModel> _listAnnotate = [];
 
@@ -57,7 +57,7 @@ class MapCubit extends Cubit<MapState> {
 
   void generateRoute(BuildContext context) async {
     if (_listAnnotate.isEmpty || _listAnnotate.length < 2) {
-      _showAlertDialog(context);
+      _showAlertDialog(context, "Jumlah point setidaknya harus lebih dari 1");
       return;
     }
     emit(MapLoadingState());
@@ -79,6 +79,9 @@ class MapCubit extends Cubit<MapState> {
       emit(MapReadyState(
           mapUtils: _map,
           geometry: dirrectionModel.routes[0].geometry.coordinates));
+    } else {
+      _showAlertDialog(context, "Kesalahan sistem, Coba lagi nanti");
+      resetMap();
     }
   }
 
@@ -93,8 +96,8 @@ class MapCubit extends Cubit<MapState> {
       List coord = await currState.mapUtils.getTapCoord(mapContext);
 
       await currState.mapUtils.addMark(pointName, coord[0], coord[1]);
-      AnnotateModel annModel =
-          AnnotateModel(text: pointName, lng: coord[0], lat: coord[1]);
+      AnnotateModel annModel = AnnotateModel(
+          text: pointName, lng: coord[0], lat: coord[1], isLegend: false);
       _listAnnotate.add(annModel);
       inspect(_listAnnotate);
     }
@@ -118,6 +121,20 @@ class MapCubit extends Cubit<MapState> {
     ));
   }
 
+  void onTapSuggestion(String text, Point point) async {
+    print("tap suggestion called");
+    final currState = state;
+    if (currState is MapReadyState) {
+      await currState.mapUtils.addLegends(text, point);
+      AnnotateModel annModel = AnnotateModel(
+          text: text,
+          lng: point.coordinates.lng,
+          lat: point.coordinates.lat,
+          isLegend: true);
+      _listAnnotate.add(annModel);
+    }
+  }
+
   Future<String> _showInputDialog(BuildContext context) async {
     String result = "";
     await showDialog(
@@ -133,14 +150,14 @@ class MapCubit extends Cubit<MapState> {
     return result;
   }
 
-  Future<String> _showAlertDialog(BuildContext context) async {
+  Future<String> _showAlertDialog(BuildContext context, String desc) async {
     String result = "";
     await showDialog(
       context: context,
-      builder: (context) => const CustomAlertDialog(
+      builder: (context) => CustomAlertDialog(
         text: "Ooops",
         textStyle: appTextStyle.t16b,
-        desc: "Jumlah point setidaknya harus lebih dari 1",
+        desc: desc,
         descStyle: appTextStyle.t14,
       ),
     );

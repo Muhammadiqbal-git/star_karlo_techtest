@@ -1,4 +1,4 @@
-import 'package:test_starkarlo/utils/map_utils.dart';
+import 'package:test_starkarlo/utils/map_util.dart';
 
 abstract class MapState {}
 
@@ -7,7 +7,7 @@ class MapLoadingState extends MapState {
 }
 
 class MapReadyState extends MapState {
-  final MapUtils mapUtils;
+  final MapUtil mapUtils;
   final List<List<double>>? geometry;
   MapReadyState({required this.mapUtils, this.geometry});
 }
